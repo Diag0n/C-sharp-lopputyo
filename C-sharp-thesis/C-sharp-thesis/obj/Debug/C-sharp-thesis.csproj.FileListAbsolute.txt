@@ -10,3 +10,15 @@ C:\Users\s3tiju01\OneDrive - OSAO\C# loppytyö\C-sharp-thesis\C-sharp-thesis\obj
 C:\Users\s3tiju01\OneDrive - OSAO\C# loppytyö\C-sharp-thesis\C-sharp-thesis\obj\Debug\C-sharp-thesis.pdb
 C:\Users\s3tiju01\OneDrive - OSAO\C# loppytyö\C-sharp-thesis\C-sharp-thesis\obj\Debug\C_sharp_thesis.Form2.resources
 C:\Users\s3tiju01\OneDrive - OSAO\C# loppytyö\C-sharp-thesis\C-sharp-thesis\obj\Debug\C_sharp_thesis.Form3.resources
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\bin\Debug\C-sharp-thesis.exe.config
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\bin\Debug\C-sharp-thesis.exe
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\bin\Debug\C-sharp-thesis.pdb
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C-sharp-thesis.csproj.AssemblyReference.cache
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C_sharp_thesis.Form1.resources
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C_sharp_thesis.Form2.resources
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C_sharp_thesis.Form3.resources
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C_sharp_thesis.Properties.Resources.resources
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C-sharp-thesis.csproj.GenerateResource.cache
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C-sharp-thesis.csproj.CoreCompileInputs.cache
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C-sharp-thesis.exe
+C:\Users\juliu\source\repos\C-sharp-lopputyo\C-sharp-thesis\C-sharp-thesis\obj\Debug\C-sharp-thesis.pdb
