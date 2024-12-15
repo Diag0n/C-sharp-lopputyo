@@ -8,6 +8,8 @@ namespace C_sharp_thesis
     {
         private TetrisGame tetrisGame;
         private PictureBox pictureBox1;
+        private Label scoreLabel; // Label to display the score
+        private int score; // Score variable
 
         public Form3()
         {
@@ -19,50 +21,61 @@ namespace C_sharp_thesis
 
         private void InitializeGameUI()
         {
-            // Gamespace
+            // Game area setup
             pictureBox1 = new PictureBox
             {
                 Location = new Point(10, 10),
-                Size = new Size(400, 800),
+                Size = new Size(400, 800), // Increased game area size
                 BorderStyle = BorderStyle.FixedSingle
             };
 
-            // return-button
+            // Return button
             Button returnButton = new Button
             {
                 Text = "Return",
-                Location = new Point(220, 10),
+                Location = new Point(420, 1200),
                 Size = new Size(80, 30)
             };
 
-            returnButton.Click += Button1_Click;
+            scoreLabel = new Label
+            {
+                Text = "Score: 0",
+                Location = new Point(420, 50),
+                Size = new Size(120, 30),
+                Font = new Font("Arial", 14, FontStyle.Bold)
+            };
+
 
             Controls.Add(returnButton);
-
             Controls.Add(pictureBox1);
         }
 
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            this.Close(); // Closes the current form
+        }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-            tetrisGame.HandleKeyDown(e.KeyCode);
+            tetrisGame.HandleKeyDown(e.KeyCode); // Passes key events to the game
         }
     }
 
     public class TetrisGame
     {
-        private readonly int tileSize = 20; // Square size in pixels
-        private readonly int boardWidth = 10; // Game area width
-        private readonly int boardHeight = 20; // Game area height
-        private int[,] board; // Game area
-        private int[,] currentPiece; // Current piece
-        private Point piecePosition; // Current piece position
+        private readonly int tileSize = 40; // Size of each tile in pixels
+        private readonly int boardWidth = 10; // Game area width in tiles
+        private readonly int boardHeight = 20; // Game area height in tiles
+        private int[,] board; // Represents the game grid
+        private int[,] currentPiece; // Currently active piece
+        private Point piecePosition; // Current position of the active piece
         private readonly PictureBox pictureBox;
         private readonly Bitmap gameBitmap;
         private Timer gameTimer;
+        private bool gameOver = false; // Tracks whether the game is over
 
-        // Piece shape
+        // Piece shapes (I, O, T)
         private readonly int[][,] pieces = new int[][,]
         {
             new int[4, 4] // I-piece
@@ -94,55 +107,60 @@ namespace C_sharp_thesis
 
         private void InitGame()
         {
-            board = new int[boardHeight, boardWidth];
-            SpawnNewPiece();
+            board = new int[boardHeight, boardWidth]; // Initializes the game grid
+            SpawnNewPiece(); // Spawns the first piece
 
-            gameTimer = new Timer { Interval = 500 };
-            gameTimer.Tick += (s, e) => MovePiece(0, 1);
+            // Sets up the game timer
+            gameTimer = new Timer { Interval = 500 }; // Timer interval in milliseconds
+            gameTimer.Tick += (s, e) => MovePiece(0, 1); // Moves the piece down every tick
             gameTimer.Start();
 
-            DrawGame();
+            DrawGame(); // Draws the initial game state
         }
 
         public void HandleKeyDown(Keys keyCode)
         {
+            // Handles key presses for controlling the game
+            if (gameOver) return; // No controls if the game is over
+
             switch (keyCode)
             {
                 case Keys.A:
-                    MovePiece(-1, 0);
+                    MovePiece(-1, 0); // Move left
                     break;
                 case Keys.D:
-                    MovePiece(1, 0);
+                    MovePiece(1, 0); // Move right
                     break;
                 case Keys.S:
-                    MovePiece(0, 1);
+                    MovePiece(0, 1); // Move down faster
                     break;
                 case Keys.W:
-                    RotatePiece();
+                    RotatePiece(); // Rotate the piece
                     break;
             }
         }
-
 
         private void SpawnNewPiece()
         {
-            var random = new Random();
-            currentPiece = pieces[random.Next(pieces.Length)];
-            piecePosition = new Point(boardWidth / 2 - currentPiece.GetLength(1) / 2, 0);
+            if (gameOver) return; // Do not spawn a piece if the game is over
 
+            var random = new Random();
+            currentPiece = pieces[random.Next(pieces.Length)]; // Selects a random piece
+            piecePosition = new Point(boardWidth / 2 - currentPiece.GetLength(1) / 2, 0); // Initial position
+
+            // Check if the piece can be placed; if not, game over
             if (!CanPlacePiece(piecePosition.X, piecePosition.Y, currentPiece))
             {
-                gameTimer.Stop();
-                MessageBox.Show("Game Over!");
+                gameTimer.Stop(); // Stop the game timer
+                gameOver = true; // Mark the game as over
+                MessageBox.Show("Game Over!"); // Display game over message
                 return;
             }
-
         }
-
-
 
         private bool CanPlacePiece(int x, int y, int[,] piece)
         {
+            // Checks if a piece can be placed at a specified position
             for (int row = 0; row < piece.GetLength(0); row++)
             {
                 for (int col = 0; col < piece.GetLength(1); col++)
@@ -152,13 +170,13 @@ namespace C_sharp_thesis
                         int newX = x + col;
                         int newY = y + row;
 
-                        // Makes sure that piece is inside game area
+                        // Check boundaries
                         if (newX < 0 || newX >= boardWidth || newY >= boardHeight)
                         {
                             return false;
                         }
 
-                        // Makes sure that piece doesn't touch other pieces
+                        // Check for collisions
                         if (board[newY, newX] == 1)
                         {
                             return false;
@@ -169,10 +187,11 @@ namespace C_sharp_thesis
             return true;
         }
 
-
-
         private void MovePiece(int dx, int dy)
         {
+            // Moves the active piece if possible
+            if (gameOver) return; // Do not move if the game is over
+
             int newX = piecePosition.X + dx;
             int newY = piecePosition.Y + dy;
 
@@ -180,21 +199,19 @@ namespace C_sharp_thesis
             {
                 piecePosition.X = newX;
                 piecePosition.Y = newY;
-                DrawGame();
+                DrawGame(); // Redraw the game
             }
-            else if (dy > 0)
+            else if (dy > 0) // If the piece cannot move down
             {
-                PlacePiece(); 
-                ClearFullRows();
-                SpawnNewPiece();
-                DrawGame();
+                PlacePiece(); // Place the piece on the board
+                ClearFullRows(); // Clear completed rows
+                SpawnNewPiece(); // Spawn a new piece
             }
         }
 
-
-
         private void RotatePiece()
         {
+            // Rotates the current piece clockwise
             int size = currentPiece.GetLength(0);
             var rotatedPiece = new int[size, size];
 
@@ -206,19 +223,17 @@ namespace C_sharp_thesis
                 }
             }
 
-            // Checks if piece is able to rotate
             if (CanPlacePiece(piecePosition.X, piecePosition.Y, rotatedPiece))
             {
-                currentPiece = rotatedPiece;
-                DrawGame();
+                currentPiece = rotatedPiece; // Apply the rotation if valid
             }
+
+            DrawGame();
         }
-
-
-
 
         private void PlacePiece()
         {
+            // Locks the current piece onto the game board
             for (int row = 0; row < currentPiece.GetLength(0); row++)
             {
                 for (int col = 0; col < currentPiece.GetLength(1); col++)
@@ -235,6 +250,7 @@ namespace C_sharp_thesis
 
         private void ClearFullRows()
         {
+            // Checks for and clears full rows
             for (int row = 0; row < boardHeight; row++)
             {
                 bool isFull = true;
@@ -250,6 +266,7 @@ namespace C_sharp_thesis
 
                 if (isFull)
                 {
+                    // Shift all rows above downwards
                     for (int y = row; y > 0; y--)
                     {
                         for (int col = 0; col < boardWidth; col++)
@@ -258,6 +275,7 @@ namespace C_sharp_thesis
                         }
                     }
 
+                    // Clear the top row
                     for (int col = 0; col < boardWidth; col++)
                     {
                         board[0, col] = 0;
@@ -268,11 +286,12 @@ namespace C_sharp_thesis
 
         private void DrawGame()
         {
+            // Renders the game state
             using (Graphics g = Graphics.FromImage(gameBitmap))
             {
-                g.Clear(Color.Black);
+                g.Clear(Color.Black); // Clear the game area
 
-                // Draws game area
+                // Draw the locked pieces
                 for (int row = 0; row < boardHeight; row++)
                 {
                     for (int col = 0; col < boardWidth; col++)
@@ -285,7 +304,7 @@ namespace C_sharp_thesis
                     }
                 }
 
-                // Draws current piece
+                // Draw the active piece
                 for (int row = 0; row < currentPiece.GetLength(0); row++)
                 {
                     for (int col = 0; col < currentPiece.GetLength(1); col++)
@@ -305,7 +324,7 @@ namespace C_sharp_thesis
                 }
             }
 
-            pictureBox.Image = (Image)gameBitmap.Clone();
+            pictureBox.Image = (Image)gameBitmap.Clone(); // Update the PictureBox
         }
     }
 }

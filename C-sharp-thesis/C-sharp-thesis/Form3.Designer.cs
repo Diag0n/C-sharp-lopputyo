@@ -67,10 +67,8 @@ namespace C_sharp_thesis
 
 
 
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            this.Close(); // Current window will close
-        }
+
+
 
 
         #endregion
