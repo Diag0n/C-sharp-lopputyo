@@ -12,37 +12,36 @@ namespace C_sharp_thesis
         public Form3()
         {
             InitializeComponent();
-            KeyPreview = true;
+            KeyPreview = true; // Enables listening to keystrokes
             InitializeGameUI();
             tetrisGame = new TetrisGame(pictureBox1);
         }
 
         private void InitializeGameUI()
         {
+            // Gamespace
             pictureBox1 = new PictureBox
             {
                 Location = new Point(10, 10),
-                Size = new Size(200, 400),
+                Size = new Size(400, 800),
                 BorderStyle = BorderStyle.FixedSingle
             };
 
-            button1 = new Button
+            // return-button
+            Button returnButton = new Button
             {
-                Text = "Palaa",
+                Text = "Return",
                 Location = new Point(220, 10),
                 Size = new Size(80, 30)
             };
 
-            button1.Click += Button1_Click;
+            returnButton.Click += Button1_Click;
+
+            Controls.Add(returnButton);
 
             Controls.Add(pictureBox1);
-            Controls.Add(button1);
         }
 
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -53,18 +52,37 @@ namespace C_sharp_thesis
 
     public class TetrisGame
     {
-        private readonly int tileSize = 20;
-        private int[,] currentPiece;
-        private Point piecePosition;
+        private readonly int tileSize = 20; // Square size in pixels
+        private readonly int boardWidth = 10; // Game area width
+        private readonly int boardHeight = 20; // Game area height
+        private int[,] board; // Game area
+        private int[,] currentPiece; // Current piece
+        private Point piecePosition; // Current piece position
         private readonly PictureBox pictureBox;
         private readonly Bitmap gameBitmap;
+        private Timer gameTimer;
 
-        private readonly int[,] IBlock = new int[4, 4]
+        // Piece shape
+        private readonly int[][,] pieces = new int[][,]
         {
-        { 0, 0, 0, 0 },
-        { 1, 1, 1, 1 },
-        { 0, 0, 0, 0 },
-        { 0, 0, 0, 0 }
+            new int[4, 4] // I-piece
+            {
+                { 0, 0, 0, 0 },
+                { 1, 1, 1, 1 },
+                { 0, 0, 0, 0 },
+                { 0, 0, 0, 0 }
+            },
+            new int[2, 2] // O-piece
+            {
+                { 1, 1 },
+                { 1, 1 }
+            },
+            new int[3, 3] // T-piece
+            {
+                { 0, 1, 0 },
+                { 1, 1, 1 },
+                { 0, 0, 0 }
+            }
         };
 
         public TetrisGame(PictureBox pictureBox)
@@ -76,11 +94,13 @@ namespace C_sharp_thesis
 
         private void InitGame()
         {
-            currentPiece = IBlock;
-            piecePosition = new Point(3, 0);
-            Timer timer = new Timer { Interval = 500 };
-            timer.Tick += (s, e) => MovePiece(0, 1);
-            timer.Start();
+            board = new int[boardHeight, boardWidth];
+            SpawnNewPiece();
+
+            gameTimer = new Timer { Interval = 500 };
+            gameTimer.Tick += (s, e) => MovePiece(0, 1);
+            gameTimer.Start();
+
             DrawGame();
         }
 
@@ -88,32 +108,95 @@ namespace C_sharp_thesis
         {
             switch (keyCode)
             {
-                case Keys.Left:
+                case Keys.A:
                     MovePiece(-1, 0);
                     break;
-                case Keys.Right:
+                case Keys.D:
                     MovePiece(1, 0);
                     break;
-                case Keys.Down:
+                case Keys.S:
                     MovePiece(0, 1);
                     break;
-                case Keys.Up:
+                case Keys.W:
                     RotatePiece();
                     break;
             }
         }
 
+
+        private void SpawnNewPiece()
+        {
+            var random = new Random();
+            currentPiece = pieces[random.Next(pieces.Length)];
+            piecePosition = new Point(boardWidth / 2 - currentPiece.GetLength(1) / 2, 0);
+
+            if (!CanPlacePiece(piecePosition.X, piecePosition.Y, currentPiece))
+            {
+                gameTimer.Stop();
+                MessageBox.Show("Game Over!");
+                return;
+            }
+
+        }
+
+
+
+        private bool CanPlacePiece(int x, int y, int[,] piece)
+        {
+            for (int row = 0; row < piece.GetLength(0); row++)
+            {
+                for (int col = 0; col < piece.GetLength(1); col++)
+                {
+                    if (piece[row, col] == 1)
+                    {
+                        int newX = x + col;
+                        int newY = y + row;
+
+                        // Makes sure that piece is inside game area
+                        if (newX < 0 || newX >= boardWidth || newY >= boardHeight)
+                        {
+                            return false;
+                        }
+
+                        // Makes sure that piece doesn't touch other pieces
+                        if (board[newY, newX] == 1)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+
+
         private void MovePiece(int dx, int dy)
         {
-            piecePosition.X += dx;
-            piecePosition.Y += dy;
-            DrawGame();
+            int newX = piecePosition.X + dx;
+            int newY = piecePosition.Y + dy;
+
+            if (CanPlacePiece(newX, newY, currentPiece))
+            {
+                piecePosition.X = newX;
+                piecePosition.Y = newY;
+                DrawGame();
+            }
+            else if (dy > 0)
+            {
+                PlacePiece(); 
+                ClearFullRows();
+                SpawnNewPiece();
+                DrawGame();
+            }
         }
+
+
 
         private void RotatePiece()
         {
             int size = currentPiece.GetLength(0);
-            int[,] rotatedPiece = new int[size, size];
+            var rotatedPiece = new int[size, size];
 
             for (int y = 0; y < size; y++)
             {
@@ -123,10 +206,65 @@ namespace C_sharp_thesis
                 }
             }
 
-            currentPiece = rotatedPiece;
-            DrawGame();
+            // Checks if piece is able to rotate
+            if (CanPlacePiece(piecePosition.X, piecePosition.Y, rotatedPiece))
+            {
+                currentPiece = rotatedPiece;
+                DrawGame();
+            }
         }
 
+
+
+
+        private void PlacePiece()
+        {
+            for (int row = 0; row < currentPiece.GetLength(0); row++)
+            {
+                for (int col = 0; col < currentPiece.GetLength(1); col++)
+                {
+                    if (currentPiece[row, col] == 1)
+                    {
+                        int boardX = piecePosition.X + col;
+                        int boardY = piecePosition.Y + row;
+                        board[boardY, boardX] = 1;
+                    }
+                }
+            }
+        }
+
+        private void ClearFullRows()
+        {
+            for (int row = 0; row < boardHeight; row++)
+            {
+                bool isFull = true;
+
+                for (int col = 0; col < boardWidth; col++)
+                {
+                    if (board[row, col] == 0)
+                    {
+                        isFull = false;
+                        break;
+                    }
+                }
+
+                if (isFull)
+                {
+                    for (int y = row; y > 0; y--)
+                    {
+                        for (int col = 0; col < boardWidth; col++)
+                        {
+                            board[y, col] = board[y - 1, col];
+                        }
+                    }
+
+                    for (int col = 0; col < boardWidth; col++)
+                    {
+                        board[0, col] = 0;
+                    }
+                }
+            }
+        }
 
         private void DrawGame()
         {
@@ -134,25 +272,38 @@ namespace C_sharp_thesis
             {
                 g.Clear(Color.Black);
 
-                for (int y = 0; y < currentPiece.GetLength(0); y++)
+                // Draws game area
+                for (int row = 0; row < boardHeight; row++)
                 {
-                    for (int x = 0; x < currentPiece.GetLength(1); x++)
+                    for (int col = 0; col < boardWidth; col++)
                     {
-                        if (currentPiece[y, x] == 1)
+                        if (board[row, col] == 1)
+                        {
+                            g.FillRectangle(Brushes.Gray, col * tileSize, row * tileSize, tileSize, tileSize);
+                            g.DrawRectangle(Pens.Black, col * tileSize, row * tileSize, tileSize, tileSize);
+                        }
+                    }
+                }
+
+                // Draws current piece
+                for (int row = 0; row < currentPiece.GetLength(0); row++)
+                {
+                    for (int col = 0; col < currentPiece.GetLength(1); col++)
+                    {
+                        if (currentPiece[row, col] == 1)
                         {
                             g.FillRectangle(Brushes.Cyan,
-                                (piecePosition.X + x) * tileSize,
-                                (piecePosition.Y + y) * tileSize,
+                                (piecePosition.X + col) * tileSize,
+                                (piecePosition.Y + row) * tileSize,
                                 tileSize, tileSize);
                             g.DrawRectangle(Pens.Black,
-                                (piecePosition.X + x) * tileSize,
-                                (piecePosition.Y + y) * tileSize,
+                                (piecePosition.X + col) * tileSize,
+                                (piecePosition.Y + row) * tileSize,
                                 tileSize, tileSize);
                         }
                     }
                 }
             }
-
 
             pictureBox.Image = (Image)gameBitmap.Clone();
         }

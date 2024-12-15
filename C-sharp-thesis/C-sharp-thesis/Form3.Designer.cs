@@ -45,7 +45,7 @@ namespace C_sharp_thesis
             this.button1.TabIndex = 0;
             this.button1.Text = "Back";
             this.button1.UseVisualStyleBackColor = false;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
             // Form3
             // 
@@ -67,10 +67,11 @@ namespace C_sharp_thesis
 
 
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            this.Close(); // Current window will close
         }
+
 
         #endregion
 
