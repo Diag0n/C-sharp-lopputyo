@@ -9,19 +9,19 @@ namespace C_sharp_thesis
         private TetrisGame tetrisGame;
         private PictureBox pictureBox1;
         private Label scoreLabel; // Label to display the score
-        private int score; // Score variable
+        private int score; // Variable to hold the score
 
         public Form3()
         {
             InitializeComponent();
             KeyPreview = true; // Enables listening to keystrokes
             InitializeGameUI();
-            tetrisGame = new TetrisGame(pictureBox1);
+            tetrisGame = new TetrisGame(pictureBox1, this);
         }
 
         private void InitializeGameUI()
         {
-            // Game area setup
+            // Setup for the game area
             pictureBox1 = new PictureBox
             {
                 Location = new Point(10, 10),
@@ -42,12 +42,24 @@ namespace C_sharp_thesis
                 Text = "Score: 0",
                 Location = new Point(420, 50),
                 Size = new Size(120, 30),
-                Font = new Font("Arial", 14, FontStyle.Bold)
+                Font = new Font("Arial", 14, FontStyle.Bold),
+                ForeColor = Color.White // Set the text color to white
             };
-
 
             Controls.Add(returnButton);
             Controls.Add(pictureBox1);
+            Controls.Add(scoreLabel);
+        }
+
+        public void UpdateScore(int points)
+        {
+            score += points; // Add the points to the current score
+            RefreshUI(); // Refresh the score display
+        }
+
+        private void RefreshUI()
+        {
+            scoreLabel.Text = $"Score: {score}"; // Update the score label with the new score
         }
 
         private void Button1_Click(object sender, EventArgs e)
@@ -74,6 +86,7 @@ namespace C_sharp_thesis
         private readonly Bitmap gameBitmap;
         private Timer gameTimer;
         private bool gameOver = false; // Tracks whether the game is over
+        private Form3 form; // Reference to the main form for updating score
 
         // Piece shapes (I, O, T)
         private readonly int[][,] pieces = new int[][,]
@@ -98,30 +111,31 @@ namespace C_sharp_thesis
             }
         };
 
-        public TetrisGame(PictureBox pictureBox)
+        public TetrisGame(PictureBox pictureBox, Form3 form)
         {
             this.pictureBox = pictureBox;
             this.gameBitmap = new Bitmap(pictureBox.Width, pictureBox.Height);
+            this.form = form; // Store reference to the main form
             InitGame();
         }
 
         private void InitGame()
         {
-            board = new int[boardHeight, boardWidth]; // Initializes the game grid
-            SpawnNewPiece(); // Spawns the first piece
+            board = new int[boardHeight, boardWidth]; // Initialize the game grid
+            SpawnNewPiece(); // Spawn the first piece
 
-            // Sets up the game timer
+            // Setup the game timer
             gameTimer = new Timer { Interval = 500 }; // Timer interval in milliseconds
-            gameTimer.Tick += (s, e) => MovePiece(0, 1); // Moves the piece down every tick
+            gameTimer.Tick += (s, e) => MovePiece(0, 1); // Move the piece down every tick
             gameTimer.Start();
 
-            DrawGame(); // Draws the initial game state
+            DrawGame(); // Draw the initial game state
         }
 
         public void HandleKeyDown(Keys keyCode)
         {
             // Handles key presses for controlling the game
-            if (gameOver) return; // No controls if the game is over
+            if (gameOver) return; // Do not process input if the game is over
 
             switch (keyCode)
             {
@@ -145,7 +159,7 @@ namespace C_sharp_thesis
             if (gameOver) return; // Do not spawn a piece if the game is over
 
             var random = new Random();
-            currentPiece = pieces[random.Next(pieces.Length)]; // Selects a random piece
+            currentPiece = pieces[random.Next(pieces.Length)]; // Select a random piece
             piecePosition = new Point(boardWidth / 2 - currentPiece.GetLength(1) / 2, 0); // Initial position
 
             // Check if the piece can be placed; if not, game over
@@ -194,7 +208,7 @@ namespace C_sharp_thesis
 
             int newX = piecePosition.X + dx;
             int newY = piecePosition.Y + dy;
-            
+
             if (CanPlacePiece(newX, newY, currentPiece))
             {
                 piecePosition.X = newX;
@@ -250,7 +264,8 @@ namespace C_sharp_thesis
 
         private void ClearFullRows()
         {
-            // Checks for and clears full rows
+            int clearedRows = 0; // Count how many rows were cleared
+
             for (int row = 0; row < boardHeight; row++)
             {
                 bool isFull = true;
@@ -266,7 +281,9 @@ namespace C_sharp_thesis
 
                 if (isFull)
                 {
-                    // Shift all rows above downwards
+                    clearedRows++; // Increment cleared rows count
+
+                    // Shift all rows above downward
                     for (int y = row; y > 0; y--)
                     {
                         for (int col = 0; col < boardWidth; col++)
@@ -281,6 +298,25 @@ namespace C_sharp_thesis
                         board[0, col] = 0;
                     }
                 }
+            }
+
+            if (clearedRows > 0)
+            {
+                int points = CalculatePoints(clearedRows); // Calculate score based on rows cleared
+                form.UpdateScore(points); // Update the score on the main form
+            }
+        }
+
+        private int CalculatePoints(int rowsCleared)
+        {
+            // Scoring logic based on the number of rows cleared
+            switch (rowsCleared)
+            {
+                case 1: return 100; // 1 row = 100 points
+                case 2: return 300; // 2 rows = 300 points
+                case 3: return 500; // 3 rows = 500 points
+                case 4: return 800; // 4 rows (Tetris) = 800 points
+                default: return 0; // No points
             }
         }
 
