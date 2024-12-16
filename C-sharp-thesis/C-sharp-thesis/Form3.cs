@@ -39,9 +39,10 @@ namespace C_sharp_thesis
 
             scoreLabel = new Label
             {
+                AutoSize = false, //ADDED
                 Text = "Score: 0",
                 Location = new Point(420, 50),
-                Size = new Size(120, 30),
+                Size = new Size(240, 30),
                 Font = new Font("Arial", 14, FontStyle.Bold),
                 ForeColor = Color.White // Set the text color to white
             };
