@@ -194,7 +194,7 @@ namespace C_sharp_thesis
 
             int newX = piecePosition.X + dx;
             int newY = piecePosition.Y + dy;
-
+            
             if (CanPlacePiece(newX, newY, currentPiece))
             {
                 piecePosition.X = newX;
