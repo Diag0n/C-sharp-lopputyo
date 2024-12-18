@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace C_sharp_thesis
@@ -9,7 +10,7 @@ namespace C_sharp_thesis
         private TetrisGame tetrisGame;
         private PictureBox pictureBox1;
         private Label scoreLabel; // Label to display the score
-        private int score; // Variable to hold the score
+        public int score; // Variable to hold the score
 
         public Form3()
         {
@@ -39,7 +40,7 @@ namespace C_sharp_thesis
 
             scoreLabel = new Label
             {
-                AutoSize = false, //ADDED
+                AutoSize = false,
                 Text = "Score: 0",
                 Location = new Point(420, 50),
                 Size = new Size(240, 30),
@@ -168,12 +169,21 @@ namespace C_sharp_thesis
             {
                 gameTimer.Stop(); // Stop the game timer
                 gameOver = true; // Mark the game as over
+
+                // Save score to file
+                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scores.log");
+                using (StreamWriter writer = new StreamWriter(filePath, true))
+                {
+                    writer.WriteLine($"Score: {form.score}"); // Write score to file
+                    Console.WriteLine($"Saved score: {form.score}"); // Debug print
+                }
+
                 MessageBox.Show("Game Over!"); // Display game over message
                 return;
             }
-        }
+        }   
 
-        private bool CanPlacePiece(int x, int y, int[,] piece)
+            private bool CanPlacePiece(int x, int y, int[,] piece)
         {
             // Checks if a piece can be placed at a specified position
             for (int row = 0; row < piece.GetLength(0); row++)

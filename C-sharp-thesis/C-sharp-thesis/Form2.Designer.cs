@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace C_sharp_thesis
 {
     partial class Form2
@@ -30,7 +32,6 @@ namespace C_sharp_thesis
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.listView1 = new System.Windows.Forms.ListView();
             this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -40,21 +41,12 @@ namespace C_sharp_thesis
             this.label1.BackColor = System.Drawing.SystemColors.InfoText;
             this.label1.Font = new System.Drawing.Font("Microsoft Tai Le", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.SystemColors.Window;
-            this.label1.Location = new System.Drawing.Point(199, 50);
+            this.label1.Location = new System.Drawing.Point(229, 50);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(314, 61);
             this.label1.TabIndex = 0;
             this.label1.Text = "Saved scores";
             this.label1.Click += new System.EventHandler(this.label1_Click);
-            // 
-            // listView1
-            // 
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(79, 137);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(576, 497);
-            this.listView1.TabIndex = 1;
-            this.listView1.UseCompatibleStateImageBehavior = false;
             // 
             // button1
             // 
@@ -76,7 +68,6 @@ namespace C_sharp_thesis
             this.BackColor = System.Drawing.SystemColors.WindowText;
             this.ClientSize = new System.Drawing.Size(734, 861);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.listView1);
             this.Controls.Add(this.label1);
             this.Name = "Form2";
             this.Text = "Form2";
@@ -85,10 +76,14 @@ namespace C_sharp_thesis
 
         }
 
+        private void label1_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.Button button1;
     }
 }
